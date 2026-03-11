@@ -1,145 +1,133 @@
-Hello giazz my name is khushal kumar sahu , 
-and i want to tell u gaizz that i am going to create 
-a new kingdome named khushal-Mention"
+# Codex (React + TypeScript)
 
-# Summarizer App
+## 📌 Overview
 
-A full-stack web application for document summarization, featuring interactive notebooks, mind maps, quizzes, and chat functionality.
+AI Learning Assistant is a modern web application designed to help users understand complex topics through **AI-powered tools** such as chat interaction, automatic summaries, and visual mind maps.
 
-## Features
+The platform allows users to explore knowledge in an interactive way using multiple AI-assisted learning features.
 
-- **Document Upload**: Upload PDF and text documents for summarization
-- **AI-Powered Summarization**: Generate concise summaries using advanced NLP techniques
-- **Interactive Notebook**: Edit and organize summarized content
-- **Mind Maps**: Visualize relationships and concepts from your documents
-- **Quiz Generation**: Create and take quizzes based on summarized content
-- **Real-time Chat**: Discuss and collaborate on document insights
-- **Responsive Design**: Works seamlessly on desktop and mobile devices
+---
 
-## Tech Stack
+## ✨ Features
 
-### Frontend
-- **React 19** - UI framework
-- **TypeScript** - Type safety
-- **Vite** - Build tool and dev server
-- **Tailwind CSS** - Utility-first CSS framework
-- **React Router** - Client-side routing
-- **TipTap** - Rich text editor
-- **Lucide React** - Icon library
+* **Dashboard** – Central hub to access all AI tools.
+* **AI Chatbot** – Ask questions and get intelligent responses.
+* **Mind Map Generator** – Visualize concepts and relationships.
+* **AI Summary Tool** – Convert long text into concise summaries.
+* **Authentication Pages** – Login system for users.
+* **Modular Architecture** – Scalable folder structure for future expansion.
 
-### Backend
-- **Python** - Server-side language
-- **Flask** - Web framework
-- **NLP Libraries** - For text processing and summarization
+---
 
-## Installation
+## 🛠️ Tech Stack
 
-### Prerequisites
-- Node.js (v18 or higher)
-- Python (v3.8 or higher)
-- npm or yarn
+**Frontend**
 
-### Frontend Setup
-1. Clone the repository
-2. Navigate to the project directory
-3. Install dependencies:
-   ```bash
-   npm install
-   ```
-4. Start the development server:
-   ```bash
-   npm run dev
-   ```
+* React
+* TypeScript
+* Vite
+* React Router
 
-### Backend Setup
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-2. Create a virtual environment:
-   ```bash
-   python -m venv venv
-   ```
-3. Activate the virtual environment:
-   - Windows: `venv\Scripts\activate`
-   - macOS/Linux: `source venv/bin/activate`
-4. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-5. Run the Flask server:
-   ```bash
-   python main.py
-   ```
+**Visualization**
 
-## Usage
+* Mermaid.js (for mind maps)
 
-1. Open your browser and navigate to `http://localhost:5173` (frontend)
-2. Upload a document (PDF or text file)
-3. Wait for the AI to generate a summary
-4. Explore the summarized content in the notebook
-5. Create mind maps to visualize concepts
-6. Generate and take quizzes
-7. Use the chat feature to discuss insights
+**Backend (Planned / Optional)**
 
-## API Endpoints
+* Node.js
+* Express
+* LLM APIs (OpenAI / Gemini)
 
-The backend provides the following main endpoints:
+---
 
-- `POST /upload` - Upload documents for summarization
-- `GET /summary/:id` - Retrieve document summary
-- `POST /quiz/generate` - Generate quiz questions
-- `GET /mindmap/:id` - Get mind map data
-
-## Project Structure
+## 📁 Project Structure
 
 ```
-├── src/
-│   ├── components/
-│   │   ├── chat/          # Chat-related components
-│   │   ├── mindmap/       # Mind map visualization
-│   │   ├── quiz/          # Quiz components
-│   │   └── upload/        # File upload components
-│   ├── pages/             # Main application pages
-│   ├── hooks/             # Custom React hooks
-│   ├── types/             # TypeScript type definitions
-│   └── Layouts/           # Layout components
-├── backend/
-│   ├── summarizer_app/
-│   │   ├── routes.py      # API routes
-│   │   ├── summarizer.py  # Summarization logic
-│   │   └── utils.py       # Utility functions
-│   └── uploads/           # Uploaded files storage
-└── public/                # Static assets
+src
+│
+├── pages
+│   ├── Home.tsx
+│   ├── Login.tsx
+│   ├── Dashboard.tsx
+│   ├── MindMap.tsx
+│   ├── ChatbotPage.tsx
+│   └── SummaryPage.tsx
+│
+├── components
+│   └── reusable UI components
+│
+├── App.tsx
+└── main.tsx
 ```
 
-## Development
+---
 
-### Available Scripts
+## 🚀 Installation
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run lint` - Run ESLint
-- `npm run preview` - Preview production build
+Clone the repository
 
-### Code Quality
+```
+git clone https://github.com/your-username/ai-learning-assistant.git
+```
 
-- ESLint for JavaScript/TypeScript linting
-- TypeScript for type checking
-- Prettier for code formatting (recommended)
+Navigate into the project folder
 
-## Contributing
+```
+cd ai-learning-assistant
+```
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature-name`
-3. Commit your changes: `git commit -m 'Add some feature'`
-4. Push to the branch: `git push origin feature/your-feature-name`
-5. Open a pull request
+Install dependencies
 
-## License
+```
+npm install
+```
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Start the development server
 
-## Support
+```
+npm run dev
+```
 
-If you have any questions or need help, please open an issue on GitHub or contact the development team.
+Open in browser
+
+```
+http://localhost:5173
+```
+
+---
+
+## 📊 Application Routes
+
+| Route        | Description                |
+| ------------ | -------------------------- |
+| `/`          | Home Page                  |
+| `/login`     | User Login                 |
+| `/dashboard` | Main application dashboard |
+| `/mindmap`   | AI-generated mind maps     |
+| `/chatbot`   | AI chatbot interface       |
+| `/summary`   | AI text summarization      |
+
+---
+
+## 🔮 Future Improvements
+
+* LLM integration (OpenAI / Gemini)
+* RAG-based knowledge retrieval
+* User authentication system
+* Notebook storage
+* AI quiz generation
+* Vector database integration
+
+---
+
+## 🎯 Purpose
+
+This project demonstrates the integration of **modern frontend architecture with AI-powered learning tools**, making it suitable for **educational platforms, productivity tools, and knowledge management systems**.
+
+---
+
+## 👨‍💻 Author
+
+**Khushal**
+
+AI & Full Stack Developer
