@@ -15,6 +15,7 @@ The platform allows users to explore knowledge in an interactive way using multi
 * **Mind Map Generator** – Visualize concepts and relationships.
 * **AI Summary Tool** – Convert long text into concise summaries.
 * **Authentication Pages** – Login system for users.
+* ** iNTERVIEW Platform
 * **Modular Architecture** – Scalable folder structure for future expansion.
 
 ---
