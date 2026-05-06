@@ -1,233 +1,415 @@
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import React, { useEffect, useState } from "react";
-import { motion, useScroll, useSpring } from "framer-motion";
+import { motion } from "framer-motion";
 import {
-    FileText,
-    Share2,
-    CreditCard,
-    MessageSquare,
-    Zap,
-    UserCheck,
-    Search,
-    Users,
-    Code,
-    Calendar,
-    ArrowRight,
-    Sparkles,
-    ArrowLeft,
-    Layout,
-    Star,
-    LogOut
+  ArrowLeft, Users, Pencil, Eraser, Square, Circle, Minus, Type,
+  Trash2, Download, Share2, Undo2, Redo2, MousePointer, Copy, Check
 } from "lucide-react";
-import { useRef } from "react";
 
-const features = [
-    { id: "summary", route: "/summary", title: "Smart Summary", tagline: "Distill documents into crisp text", desc: "AI reads your full document and produces a concise summary in seconds.", icon: <FileText size={28} />, color: "#4f46e5" },
-    { id: "mindmap", route: "/mindmap", title: "Mind Map", tagline: "Visualise knowledge as a graph", desc: "Transforms concepts into a branching mind map for visual clarity.", icon: <Share2 size={28} />, color: "#0891b2" },
-    { id: "flashcard", route: "/flashcards", title: "Flash Cards", tagline: "Learn faster with study cards", desc: "Auto-generates Q&A flashcards for effective spaced repetition.", icon: <CreditCard size={28} />, color: "#059669" },
-    { id: "chatbot", route: "/chatbot", title: "AI Chatbot", tagline: "Converse with your knowledge", desc: "Ask anything and get grounded answers cited from your files.", icon: <MessageSquare size={28} />, color: "#7c3aed" },
-    { id: "quiz", route: "/quiz", title: "Quiz Mode", tagline: "Test your understanding", desc: "Generates MCQ quizzes to track your score and find gaps.", icon: <Zap size={28} />, color: "#ea580c" },
-    { id: "interview", route: "/interview", title: "Interview Prep", tagline: "Ace interviews with topics", desc: "Extracts likely interview questions to build your confidence.", icon: <UserCheck size={28} />, color: "#dc2626" },
-    { id: "resume", route: "/resume", title: "Resume Analyzer", tagline: "Grade & optimize your resume", desc: "Detect missing skills and get AI feedback to improve ATS score.", icon: <Search size={28} />, color: "#2563eb" },
-    { id: "community", route: "/community", title: "Real-Time Community", tagline: "Live developer discussions", desc: "Join real-time channels and collaborate with other users live.", icon: <Users size={28} />, color: "#4f46e5" },
-    { id: "codecollab", route: "/code", title: "Collaborative IDE", tagline: "Code synchronously with peers", desc: "Monaco Editor environment for real-time collaborative coding.", icon: <Code size={28} />, color: "#1e293b" },
-    { id: "study-planner", route: "/study-plan", title: "AI Study Planner", tagline: "Personalized study schedules", desc: "Generate adaptive study schedules optimized for your goals.", icon: <Calendar size={28} />, color: "#6366f1" }
-];
+// ─── Types ──────────────────────────────────────────────────────────
+interface Point { x: number; y: number }
+interface DrawElement {
+  id: string;
+  tool: string;
+  points: Point[];
+  color: string;
+  width: number;
+  text?: string;
+}
 
-const Dashboard = () => {
-    const navigate = useNavigate();
-    const [user, setUser] = useState<any>(null);
-    const containerRef = useRef(null);
+const COLORS = ["#ffffff","#4f46e5","#ef4444","#22c55e","#f59e0b","#ec4899","#06b6d4","#8b5cf6","#f97316","#64748b"];
+const WIDTHS = [2, 4, 6, 10];
 
-    useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) setUser(JSON.parse(storedUser));
-    }, []);
-
-    const { scrollYProgress } = useScroll({
-        target: containerRef,
-        offset: ["start center", "end center"]
-    });
-
-    const pathLength = useSpring(scrollYProgress, {
-        stiffness: 100,
-        damping: 30,
-        restDelta: 0.001
-    });
-
-    const handleLogout = () => {
-        localStorage.removeItem('user');
-        navigate('/login');
-    };
-
-    return (
-        <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'Inter', sans-serif", color: '#1e293b' }}>
-            <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400&display=swap');
-        .roadmap-container { position: relative; max-width: 1000px; margin: 0 auto; padding: 60px 20px 200px; }
-        .feature-row { display: grid; grid-template-columns: 1fr 1fr; gap: 120px; align-items: center; margin-bottom: 180px; position: relative; z-index: 10; }
-        .icon-container {
-          background: #4f46e5;
-          color: #fff;
-          width: 80px;
-          height: 80px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 28px;
-          transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .icon-container:hover { transform: scale(1.1) rotate(5deg); }
-        
-        @media (max-width: 900px) {
-          .feature-row { grid-template-columns: 1fr; gap: 40px; }
-          .side-info { text-align: left !important; }
-          .svg-path-desktop { display: none; }
-          .icon-container { margin-left: 0 !important; margin-right: auto !important; }
-        }
-      `}</style>
-
-            {/* Nav */}
-            <nav style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '16px 48px',
-                background: 'rgba(255, 255, 255, 0.6)',
-                backdropFilter: 'blur(16px)',
-                position: 'sticky',
-                top: 0,
-                zIndex: 100,
-                borderBottom: '1px solid rgba(0,0,0,0.05)'
-            }}>
-                <div style={{ fontWeight: 800, fontSize: '1.25rem', color: '#4F46E5', display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => navigate("/home")}>
-                    <div style={{ background: '#4F46E5', color: '#fff', width: 32, height: 32, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Layout size={18} /></div>
-                    Cortex Roadmap
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-                    {user && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fff', padding: '6px 6px 6px 16px', borderRadius: '100px', border: '1px solid #e2e8f0' }}>
-                            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b' }}>{user?.name || 'User'}</div>
-                            <img src={user.avatar} style={{ width: 28, height: 28, borderRadius: '50%' }} />
-                            <button
-                                onClick={handleLogout}
-                                style={{ background: 'none', border: 'none', color: '#94a3b8', padding: '6px', cursor: 'pointer', transition: '0.2s' }}
-                                onMouseOver={e => e.currentTarget.style.color = '#ef4444'}
-                                onMouseOut={e => e.currentTarget.style.color = '#94a3b8'}
-                            >
-                                <LogOut size={14} />
-                            </button>
-                        </div>
-                    )}
-                    <button
-                        onClick={() => navigate("/home")}
-                        style={{ background: '#fff', border: '1px solid #e2e8f0', padding: '8px 20px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, color: '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
-                    >
-                        <ArrowLeft size={16} /> Home
-                    </button>
-                </div>
-            </nav>
-
-            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '80px 40px' }}>
-                <header style={{ textAlign: 'center', marginBottom: '120px' }}>
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#e0e7ff', color: '#4338ca', padding: '6px 16px', borderRadius: '100px', fontWeight: 700, fontSize: '0.85rem', marginBottom: 24 }}>
-                        <Sparkles size={16} /> Welcome back, {user?.name?.split(' ')[0] || 'Scholar'}
-                    </motion.div>
-                    <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 800, color: '#0f172a', marginBottom: 20, letterSpacing: '-0.02em' }}>Your Learning Journey.</h1>
-                    <p style={{ fontSize: '1.2rem', color: '#64748b', fontFamily: 'Lora', maxWidth: '600px', margin: '0 auto', lineHeight: 1.6 }}>Continue your path toward mastery using our elite AI-driven tools.</p>
-                </header>
-
-                <div className="roadmap-container" ref={containerRef}>
-                    {/* Curved SVG Path for Desktop */}
-                    <svg className="svg-path-desktop" width="100%" height="100%" viewBox="0 0 1000 2200" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }} preserveAspectRatio="none">
-                        <path d="M500,0 C500,100 800,200 800,400 C800,600 200,800 200,1000 C200,1200 800,1400 800,1600 C800,1800 500,1900 500,2100" fill="none" stroke="#e2e8f0" strokeWidth="6" strokeDasharray="10 10" />
-                        <motion.path
-                            d="M500,0 C500,100 800,200 800,400 C800,600 200,800 200,1000 C200,1200 800,1400 800,1600 C800,1800 500,1900 500,2100"
-                            fill="none"
-                            stroke="url(#gradient)"
-                            strokeWidth="8"
-                            strokeLinecap="round"
-                            style={{ pathLength }}
-                        />
-                        <defs>
-                            <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" stopColor="#4f46e5" />
-                                <stop offset="25%" stopColor="#0891b2" />
-                                <stop offset="50%" stopColor="#7c3aed" />
-                                <stop offset="75%" stopColor="#ea580c" />
-                                <stop offset="100%" stopColor="#6366f1" />
-                            </linearGradient>
-                        </defs>
-                    </svg>
-
-                    {features.map((f, i) => {
-                        const isLeft = i % 2 === 0;
-                        return (
-                            <motion.div
-                                key={f.id}
-                                className="feature-row"
-                                initial={{ opacity: 0, y: 50 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true, margin: "-100px" }}
-                                transition={{ duration: 0.8 }}
-                            >
-                                {/* Side 1: Info (L) or Action (R) */}
-                                <div style={{ textAlign: isLeft ? 'right' : 'left' }} className="side-info">
-                                    {isLeft ? (
-                                        <>
-                                            <h3 style={{ fontSize: '2.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>{f.title}</h3>
-                                            <p style={{ color: f.color, fontWeight: 700, fontSize: '0.95rem', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '1px' }}>{f.tagline}</p>
-                                            <p style={{ color: '#64748b', fontSize: '1.1rem', lineHeight: 1.6, maxWidth: '400px', marginLeft: 'auto' }}>{f.desc}</p>
-                                        </>
-                                    ) : (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'flex-start' }}>
-                                            <div className="icon-container" style={{ background: f.color, boxShadow: `0 15px 30px ${f.color}44` }}>
-                                                {f.icon}
-                                            </div>
-                                            <button
-                                                onClick={() => navigate(f.route)}
-                                                style={{ background: '#0f172a', color: '#fff', border: 'none', padding: '14px 32px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, transition: 'all 0.3s' }}
-                                                onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 15px 30px rgba(0,0,0,0.1)'; }}
-                                                onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
-                                            >
-                                                Launch {f.title} <ArrowRight size={18} />
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Side 2: Action (L) or Info (R) */}
-                                <div style={{ textAlign: isLeft ? 'left' : 'right' }} className="side-info">
-                                    {!isLeft ? (
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                            <h3 style={{ fontSize: '2.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>{f.title}</h3>
-                                            <p style={{ color: f.color, fontWeight: 700, fontSize: '0.95rem', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '1px' }}>{f.tagline}</p>
-                                            <p style={{ color: '#64748b', fontSize: '1.1rem', lineHeight: 1.6, maxWidth: '400px' }}>{f.desc}</p>
-                                        </div>
-                                    ) : (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'flex-end' }}>
-                                            <div className="icon-container" style={{ background: f.color, boxShadow: `0 15px 30px ${f.color}44` }}>
-                                                {f.icon}
-                                            </div>
-                                            <button
-                                                onClick={() => navigate(f.route)}
-                                                style={{ background: '#0f172a', color: '#fff', border: 'none', padding: '14px 32px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, transition: 'all 0.3s' }}
-                                                onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 15px 30px rgba(0,0,0,0.1)'; }}
-                                                onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
-                                            >
-                                                Launch {f.title} <ArrowRight size={18} />
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            </motion.div>
-                        );
-                    })}
-                </div>
-            </div>
-        </div>
-    );
+// ─── Generate Room ID ───────────────────────────────────────────────
+const genRoomId = () => {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let id = "";
+  for (let i = 0; i < 8; i++) { if (i === 4) id += "-"; id += chars[Math.floor(Math.random() * chars.length)]; }
+  return id;
 };
 
-export default Dashboard;
+export default function WhiteboardPage() {
+  const navigate = useNavigate();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // State
+  const [tool, setTool] = useState("pencil");
+  const [color, setColor] = useState("#ffffff");
+  const [strokeWidth, setStrokeWidth] = useState(4);
+  const [elements, setElements] = useState<DrawElement[]>([]);
+  const [undoStack, setUndoStack] = useState<DrawElement[][]>([]);
+  const [redoStack, setRedoStack] = useState<DrawElement[][]>([]);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [currentElement, setCurrentElement] = useState<DrawElement | null>(null);
+  const [roomId, setRoomId] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("room") || genRoomId();
+  });
+  const [copied, setCopied] = useState(false);
+  const [connectedUsers, setConnectedUsers] = useState(1);
+  const [textInput, setTextInput] = useState("");
+  const [textPos, setTextPos] = useState<Point | null>(null);
+
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+  // ─── Canvas resize ────────────────────────────────────────────────
+  useEffect(() => {
+    const resize = () => {
+      const canvas = canvasRef.current;
+      const container = containerRef.current;
+      if (!canvas || !container) return;
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
+      redrawCanvas();
+    };
+    resize();
+    window.addEventListener("resize", resize);
+    return () => window.removeEventListener("resize", resize);
+  }, [elements]);
+
+  // ─── Redraw ───────────────────────────────────────────────────────
+  const redrawCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.fillStyle = "#0f172a";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw grid
+    ctx.strokeStyle = "rgba(255,255,255,0.04)";
+    ctx.lineWidth = 1;
+    for (let x = 0; x < canvas.width; x += 30) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+    }
+    for (let y = 0; y < canvas.height; y += 30) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+    }
+
+    // Draw all elements
+    const allElements = currentElement ? [...elements, currentElement] : elements;
+    allElements.forEach(el => drawElement(ctx, el));
+  }, [elements, currentElement]);
+
+  useEffect(() => { redrawCanvas(); }, [redrawCanvas]);
+
+  // ─── Draw single element ──────────────────────────────────────────
+  const drawElement = (ctx: CanvasRenderingContext2D, el: DrawElement) => {
+    ctx.strokeStyle = el.color;
+    ctx.fillStyle = el.color;
+    ctx.lineWidth = el.width;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    if (el.tool === "pencil" || el.tool === "eraser") {
+      if (el.points.length < 2) return;
+      ctx.beginPath();
+      ctx.strokeStyle = el.tool === "eraser" ? "#0f172a" : el.color;
+      ctx.lineWidth = el.tool === "eraser" ? el.width * 4 : el.width;
+      ctx.moveTo(el.points[0].x, el.points[0].y);
+      for (let i = 1; i < el.points.length; i++) {
+        const mid = { x: (el.points[i - 1].x + el.points[i].x) / 2, y: (el.points[i - 1].y + el.points[i].y) / 2 };
+        ctx.quadraticCurveTo(el.points[i - 1].x, el.points[i - 1].y, mid.x, mid.y);
+      }
+      ctx.stroke();
+    } else if (el.tool === "line" && el.points.length === 2) {
+      ctx.beginPath();
+      ctx.moveTo(el.points[0].x, el.points[0].y);
+      ctx.lineTo(el.points[1].x, el.points[1].y);
+      ctx.stroke();
+    } else if (el.tool === "rect" && el.points.length === 2) {
+      const [p1, p2] = el.points;
+      ctx.strokeRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
+    } else if (el.tool === "circle" && el.points.length === 2) {
+      const [p1, p2] = el.points;
+      const rx = Math.abs(p2.x - p1.x) / 2;
+      const ry = Math.abs(p2.y - p1.y) / 2;
+      const cx = (p1.x + p2.x) / 2;
+      const cy = (p1.y + p2.y) / 2;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    } else if (el.tool === "text" && el.text) {
+      ctx.font = `${el.width * 4 + 12}px Inter, sans-serif`;
+      ctx.fillText(el.text, el.points[0].x, el.points[0].y);
+    }
+  };
+
+  // ─── Mouse handlers ───────────────────────────────────────────────
+  const getPos = (e: React.MouseEvent): Point => {
+    const rect = canvasRef.current!.getBoundingClientRect();
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    const pos = getPos(e);
+
+    if (tool === "text") {
+      setTextPos(pos);
+      setTextInput("");
+      return;
+    }
+    if (tool === "select") return;
+
+    setIsDrawing(true);
+    const newEl: DrawElement = {
+      id: Date.now().toString(),
+      tool: tool,
+      points: [pos],
+      color: color,
+      width: strokeWidth,
+    };
+    setCurrentElement(newEl);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDrawing || !currentElement) return;
+    const pos = getPos(e);
+
+    if (currentElement.tool === "pencil" || currentElement.tool === "eraser") {
+      setCurrentElement(prev => prev ? { ...prev, points: [...prev.points, pos] } : null);
+    } else {
+      setCurrentElement(prev => prev ? { ...prev, points: [prev.points[0], pos] } : null);
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (!isDrawing || !currentElement) return;
+    setIsDrawing(false);
+    setUndoStack(prev => [...prev, elements]);
+    setRedoStack([]);
+    setElements(prev => [...prev, currentElement]);
+    setCurrentElement(null);
+  };
+
+  const handleTextSubmit = () => {
+    if (!textPos || !textInput.trim()) { setTextPos(null); return; }
+    const el: DrawElement = {
+      id: Date.now().toString(),
+      tool: "text",
+      points: [textPos],
+      color: color,
+      width: strokeWidth,
+      text: textInput,
+    };
+    setUndoStack(prev => [...prev, elements]);
+    setRedoStack([]);
+    setElements(prev => [...prev, el]);
+    setTextPos(null);
+    setTextInput("");
+  };
+
+  // ─── Actions ──────────────────────────────────────────────────────
+  const undo = () => {
+    if (undoStack.length === 0) return;
+    const prev = undoStack[undoStack.length - 1];
+    setRedoStack(r => [...r, elements]);
+    setElements(prev);
+    setUndoStack(u => u.slice(0, -1));
+  };
+
+  const redo = () => {
+    if (redoStack.length === 0) return;
+    const next = redoStack[redoStack.length - 1];
+    setUndoStack(u => [...u, elements]);
+    setElements(next);
+    setRedoStack(r => r.slice(0, -1));
+  };
+
+  const clearCanvas = () => {
+    setUndoStack(prev => [...prev, elements]);
+    setRedoStack([]);
+    setElements([]);
+  };
+
+  const downloadCanvas = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const link = document.createElement("a");
+    link.download = `whiteboard-${roomId}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  };
+
+  const copyRoomLink = () => {
+    const url = `${window.location.origin}/whiteboard?room=${roomId}`;
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const tools = [
+    { id: "select", icon: <MousePointer size={18} />, label: "Select" },
+    { id: "pencil", icon: <Pencil size={18} />, label: "Draw" },
+    { id: "eraser", icon: <Eraser size={18} />, label: "Eraser" },
+    { id: "line", icon: <Minus size={18} />, label: "Line" },
+    { id: "rect", icon: <Square size={18} />, label: "Rectangle" },
+    { id: "circle", icon: <Circle size={18} />, label: "Circle" },
+    { id: "text", icon: <Type size={18} />, label: "Text" },
+  ];
+
+  return (
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body, #root { width: 100%; height: 100%; overflow: hidden; }
+
+        .wb-root { font-family: 'Inter', sans-serif; background: #0f172a; height: 100vh; width: 100%; display: flex; flex-direction: column; overflow: hidden; }
+
+        .wb-nav { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: rgba(15,23,42,0.95); border-bottom: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; backdrop-filter: blur(20px); z-index: 50; }
+        .wb-logo { font-weight: 800; font-size: 1rem; color: #818cf8; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .wb-logo-dot { width: 7px; height: 7px; background: #818cf8; border-radius: 50%; box-shadow: 0 0 10px #818cf8; animation: wbPulse 2s ease-in-out infinite; }
+        @keyframes wbPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.5); opacity: 0.6; } }
+
+        .wb-back { padding: 6px 16px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; color: #94a3b8; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 6px; }
+        .wb-back:hover { background: rgba(255,255,255,0.1); color: #e2e8f0; }
+
+        .wb-body { display: flex; flex: 1; overflow: hidden; position: relative; }
+
+        /* Left Toolbar */
+        .wb-toolbar { width: 56px; flex-shrink: 0; background: rgba(15,23,42,0.98); border-right: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; align-items: center; padding: 12px 0; gap: 4px; z-index: 30; }
+        .wb-tool-btn { width: 40px; height: 40px; border: none; border-radius: 10px; background: transparent; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; position: relative; }
+        .wb-tool-btn:hover { background: rgba(255,255,255,0.06); color: #e2e8f0; }
+        .wb-tool-btn.active { background: #4f46e5; color: #fff; box-shadow: 0 4px 12px rgba(79,70,229,0.4); }
+        .wb-tool-btn .wb-tooltip { position: absolute; left: 52px; background: #1e293b; color: #e2e8f0; padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s; border: 1px solid rgba(255,255,255,0.08); }
+        .wb-tool-btn:hover .wb-tooltip { opacity: 1; }
+
+        .wb-divider { width: 28px; height: 1px; background: rgba(255,255,255,0.08); margin: 6px 0; }
+
+        /* Bottom bar */
+        .wb-bottom { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 12px; background: rgba(15,23,42,0.95); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 8px 16px; backdrop-filter: blur(20px); z-index: 40; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+
+        .wb-color-btn { width: 22px; height: 22px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: all .15s; }
+        .wb-color-btn:hover { transform: scale(1.2); }
+        .wb-color-btn.active { border-color: #fff; box-shadow: 0 0 8px rgba(255,255,255,0.3); transform: scale(1.15); }
+
+        .wb-width-btn { border: none; border-radius: 6px; background: rgba(255,255,255,0.06); color: #94a3b8; cursor: pointer; padding: 4px 8px; font-size: 0.7rem; font-weight: 700; transition: all .15s; }
+        .wb-width-btn:hover { background: rgba(255,255,255,0.1); }
+        .wb-width-btn.active { background: #4f46e5; color: #fff; }
+
+        .wb-sep { width: 1px; height: 24px; background: rgba(255,255,255,0.08); }
+
+        .wb-action-btn { width: 34px; height: 34px; border: none; border-radius: 8px; background: rgba(255,255,255,0.06); color: #94a3b8; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+        .wb-action-btn:hover { background: rgba(255,255,255,0.1); color: #e2e8f0; }
+        .wb-action-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .wb-action-btn.danger:hover { background: rgba(239,68,68,0.15); color: #ef4444; }
+
+        /* Room bar */
+        .wb-room-bar { display: flex; align-items: center; gap: 12px; }
+        .wb-room-id { font-size: 0.75rem; font-weight: 700; color: #818cf8; background: rgba(79,70,229,0.15); padding: 4px 12px; border-radius: 6px; letter-spacing: 0.08em; font-family: monospace; }
+        .wb-share-btn { padding: 6px 14px; background: rgba(79,70,229,0.15); border: 1px solid rgba(79,70,229,0.3); border-radius: 8px; color: #818cf8; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 6px; }
+        .wb-share-btn:hover { background: rgba(79,70,229,0.25); }
+        .wb-users-badge { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: #22c55e; font-weight: 600; }
+        .wb-users-dot { width: 6px; height: 6px; background: #22c55e; border-radius: 50%; animation: wbPulse 2s ease-in-out infinite; }
+
+        /* Canvas area */
+        .wb-canvas-wrap { flex: 1; position: relative; overflow: hidden; }
+        .wb-canvas-wrap canvas { display: block; cursor: crosshair; }
+
+        /* Text input overlay */
+        .wb-text-overlay { position: absolute; z-index: 35; }
+        .wb-text-input { background: rgba(15,23,42,0.9); border: 2px solid #4f46e5; border-radius: 8px; color: #e2e8f0; padding: 8px 12px; font-family: Inter, sans-serif; font-size: 1rem; outline: none; min-width: 200px; backdrop-filter: blur(10px); }
+      `}</style>
+
+      <div className="wb-root">
+        {/* Nav */}
+        <nav className="wb-nav">
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <div className="wb-logo" onClick={() => navigate("/")}>
+              <div className="wb-logo-dot" /> CortexCraft
+            </div>
+            <span style={{ color: "#334155", fontSize: "1.2rem", fontWeight: 300 }}>|</span>
+            <span style={{ color: "#e2e8f0", fontWeight: 700, fontSize: "0.9rem" }}>Whiteboard</span>
+          </div>
+
+          <div className="wb-room-bar">
+            <div className="wb-users-badge"><div className="wb-users-dot" /> {connectedUsers} online</div>
+            <span className="wb-room-id">{roomId}</span>
+            <button className="wb-share-btn" onClick={copyRoomLink}>
+              {copied ? <><Check size={14} /> Copied!</> : <><Share2 size={14} /> Share</>}
+            </button>
+            <button className="wb-back" onClick={() => navigate("/dashboard")}><ArrowLeft size={14} /> Dashboard</button>
+          </div>
+        </nav>
+
+        <div className="wb-body">
+          {/* Left toolbar */}
+          <div className="wb-toolbar">
+            {tools.map(t => (
+              <button key={t.id} className={`wb-tool-btn ${tool === t.id ? "active" : ""}`} onClick={() => setTool(t.id)}>
+                {t.icon}
+                <span className="wb-tooltip">{t.label}</span>
+              </button>
+            ))}
+            <div className="wb-divider" />
+            <button className="wb-tool-btn" onClick={undo} disabled={undoStack.length === 0}>
+              <Undo2 size={18} />
+              <span className="wb-tooltip">Undo</span>
+            </button>
+            <button className="wb-tool-btn" onClick={redo} disabled={redoStack.length === 0}>
+              <Redo2 size={18} />
+              <span className="wb-tooltip">Redo</span>
+            </button>
+            <div className="wb-divider" />
+            <button className="wb-tool-btn danger" onClick={clearCanvas}>
+              <Trash2 size={18} />
+              <span className="wb-tooltip">Clear All</span>
+            </button>
+            <button className="wb-tool-btn" onClick={downloadCanvas}>
+              <Download size={18} />
+              <span className="wb-tooltip">Download</span>
+            </button>
+          </div>
+
+          {/* Canvas */}
+          <div className="wb-canvas-wrap" ref={containerRef}>
+            <canvas
+              ref={canvasRef}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              style={{ cursor: tool === "select" ? "default" : tool === "text" ? "text" : "crosshair" }}
+            />
+
+            {/* Text input overlay */}
+            {textPos && (
+              <div className="wb-text-overlay" style={{ left: textPos.x + 56, top: textPos.y }}>
+                <input
+                  className="wb-text-input"
+                  autoFocus
+                  placeholder="Type here..."
+                  value={textInput}
+                  onChange={e => setTextInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter") handleTextSubmit(); if (e.key === "Escape") setTextPos(null); }}
+                  onBlur={handleTextSubmit}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Bottom palette bar */}
+        <div className="wb-bottom">
+          {COLORS.map(c => (
+            <div
+              key={c}
+              className={`wb-color-btn ${color === c ? "active" : ""}`}
+              style={{ background: c, border: c === "#ffffff" && color !== c ? "2px solid #475569" : undefined }}
+              onClick={() => setColor(c)}
+            />
+          ))}
+          <div className="wb-sep" />
+          {WIDTHS.map(w => (
+            <button key={w} className={`wb-width-btn ${strokeWidth === w ? "active" : ""}`} onClick={() => setStrokeWidth(w)}>
+              {w}px
+            </button>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}

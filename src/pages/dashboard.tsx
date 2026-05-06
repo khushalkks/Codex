@@ -17,7 +17,8 @@ import {
   ArrowLeft,
   Layout,
   Star,
-  LogOut
+  LogOut,
+  PenTool
 } from "lucide-react";
 import { useRef } from "react";
 
@@ -31,7 +32,8 @@ const features = [
   { id: "resume", route: "/resume", title: "Resume Analyzer", tagline: "Grade & optimize your resume", desc: "Detect missing skills and get AI feedback to improve ATS score.", icon: <Search size={28} />, color: "#2563eb" },
   { id: "community", route: "/community", title: "Real-Time Community", tagline: "Live developer discussions", desc: "Join real-time channels and collaborate with other users live.", icon: <Users size={28} />, color: "#4f46e5" },
   { id: "codecollab", route: "/code", title: "Collaborative IDE", tagline: "Code synchronously with peers", desc: "Monaco Editor environment for real-time collaborative coding.", icon: <Code size={28} />, color: "#1e293b" },
-  { id: "study-planner", route: "/study-plan", title: "AI Study Planner", tagline: "Personalized study schedules", desc: "Generate adaptive study schedules optimized for your goals.", icon: <Calendar size={28} />, color: "#6366f1" }
+  { id: "study-planner", route: "/study-plan", title: "AI Study Planner", tagline: "Personalized study schedules", desc: "Generate adaptive study schedules optimized for your goals.", icon: <Calendar size={28} />, color: "#6366f1" },
+  { id: "whiteboard", route: "/whiteboard", title: "Collaborative Whiteboard", tagline: "Draw & brainstorm together", desc: "Real-time collaborative whiteboard for visual brainstorming with your team.", icon: <PenTool size={28} />, color: "#f43f5e" }
 ];
 
 const Dashboard = () => {

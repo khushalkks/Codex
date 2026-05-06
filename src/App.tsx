@@ -15,6 +15,7 @@ import ChatbotPage from "./pages/ChatbotPage";
 import QuizResultPage from "./pages/QuizResultPage";
 import StudyPlan from "./pages/StudyPlan";
 import LoginPage from "./pages/LoginPage";
+import WhiteboardPage from "./pages/whiteboard";
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -63,6 +64,7 @@ const App = () => {
       <Route path="/chatbot" element={<ProtectedRoute><ChatbotPage/></ProtectedRoute>} />
       <Route path="/quiz/result" element={<ProtectedRoute><QuizResultPage/></ProtectedRoute>} />
       <Route path="/study-plan" element={<ProtectedRoute><StudyPlan /></ProtectedRoute>} />
+      <Route path="/whiteboard" element={<ProtectedRoute><WhiteboardPage /></ProtectedRoute>} />
 
       {/* Catch-all redirect to root */}
       <Route path="*" element={<Navigate to="/" replace />} />
