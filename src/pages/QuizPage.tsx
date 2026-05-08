@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   ArrowLeft, 
@@ -9,10 +9,9 @@ import {
   RotateCcw,
   FileText,
   Zap,
-  BookOpen,
   Trophy
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 type Difficulty = "easy" | "medium" | "hard";
 type ToastType = "success" | "error" | "info";
@@ -51,7 +50,7 @@ export default function QuizPage() {
     }>
   >([]);
   const [selected, setSelected] = useState<Record<number, number>>({});
-  const [error, setError] = useState<string>("");
+  const [, setError] = useState<string>("");
 
   const showToast = (msg: string, type: ToastType = "info") => {
     setToast({ msg, type });
