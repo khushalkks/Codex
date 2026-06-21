@@ -1,133 +1,157 @@
-# Codex (React + TypeScript)
+# CodexCraft 🚀
+> A State-of-the-Art AI-Powered Collaborative Learning & Coding Suite.
 
-## 📌 Overview
+CodexCraft is a premium, feature-rich full-stack application that integrates cutting-edge **Multi-Agent AI cognitive tools** with **real-time multiplayer collaboration** for developers and students. 
 
-AI Learning Assistant is a modern web application designed to help users understand complex topics through **AI-powered tools** such as chat interaction, automatic summaries, and visual mind maps.
-
-The platform allows users to explore knowledge in an interactive way using multiple AI-assisted learning features.
-
----
-
-## ✨ Features
-
-* **Dashboard** – Central hub to access all AI tools.
-* **AI Chatbot** – Ask questions and get intelligent responses.
-* **Mind Map Generator** – Visualize concepts and relationships.
-* **AI Summary Tool** – Convert long text into concise summaries.
-* **Authentication Pages** – Login system for users.
-* **Modular Architecture** – Scalable folder structure for future expansion.
+Whether you want to visualize complex subjects through interactive mind maps, optimize study plans using Machine Learning models, simulate code interviews, or write code and sketch diagrams collaboratively with peers in real-time, CodexCraft handles it all.
 
 ---
 
-## 🛠️ Tech Stack
+## ✨ Key Features
 
-**Frontend**
+### 🧠 Multi-Agent AI Suite
+* **AI Chatbot**: Intelligent chatbot powered by Ollama models (with automatic Groq fallback) including full conversation history.
+* **Document Summarizer**: Instant, highly accurate summaries from uploaded PDF, DOCX, and TXT files using advanced parsing.
+* **Interactive Mindmaps**: Automatic concept hierarchy mapping visualized beautifully using Mermaid.js.
+* **ML-Powered Study Planner**: Generates study schedules using a local Machine Learning `LinearRegression` model to predict task difficulty and time allocations, paired with custom tips from Groq `llama-3.3-70b-versatile`.
+* **AI Quiz & Flashcards Generator**: Upload a document to instantly generate interactive multiple-choice quizzes and active-recall flashcards.
+* **AI Interview Simulator**: Interactive, custom voice/text mock interview trainer powered by Groq's async completions.
 
-* React
-* TypeScript
-* Vite
-* React Router
+### 👥 Real-Time Collaboration (Multiplayer)
+* **Collaborative Code Editor**: Multiplayer real-time code sandbox featuring Monaco Editor (VS Code core) synchronized via Socket.IO.
+* **Collaborative Whiteboard**: Seamless multiplayer vector drawing canvas with real-time cursor tracking and shape drawing.
 
-**Visualization**
+### 💬 Community Hub
+* **Discussion Forums**: Public board to share study posts, like content, comment, and engage with peers.
+* **Secure Authentication**: End-to-end user signup and login secured using PyJWT and bcrypt password hashing.
 
-* Mermaid.js (for mind maps)
+---
 
-**Backend (Planned / Optional)**
+## 🛠️ Technology Stack
 
-* Node.js
-* Express
-* LLM APIs (OpenAI / Gemini)
+| Layer | Technologies |
+| :--- | :--- |
+| **Frontend** | React, TypeScript, Vite, TailwindCSS / Custom HSL CSS, Framer Motion (micro-animations), React Router v6 |
+| **Backend** | FastAPI (Python 3.14), Uvicorn, Socket.IO AsyncServer, PyJWT, bcrypt, Motor (Async MongoDB Driver) |
+| **Machine Learning / AI** | Scikit-Learn (Linear Regression), Numpy, Groq SDK, Ollama, PyMuPDF, python-docx, PyPDF2 |
+| **Database** | MongoDB Atlas (Cloud Cluster) |
 
 ---
 
 ## 📁 Project Structure
 
-```
-src
+```text
+my_project/
+├── backend/                  # Python FastAPI Backend
+│   ├── ai/                   # AI & LLM integration modules (Groq, Gemini)
+│   ├── chatbot/              # Local / Cloud LLM orchestration
+│   ├── config/               # Database configurations (MongoDB, Motor)
+│   ├── models/               # Pydantic schemas and database models
+│   ├── routes/               # API routes (Auth, Coding, Whiteboard, Flashcards, Summary, etc.)
+│   ├── services/             # Core business logic services
+│   ├── summarizer_app/       # Mindmap, Quiz, Study Plan, and Interview services
+│   ├── main.py               # Application entrypoint (FastAPI + Socket.IO)
+│   ├── socket_coding.py      # Real-time WebSocket handlers
+│   └── requirements.txt      # Python dependencies
 │
-├── pages
-│   ├── Home.tsx
-│   ├── Login.tsx
-│   ├── Dashboard.tsx
-│   ├── MindMap.tsx
-│   ├── ChatbotPage.tsx
-│   └── SummaryPage.tsx
-│
-├── components
-│   └── reusable UI components
-│
-├── App.tsx
-└── main.tsx
+├── frontend/                 # React TypeScript Frontend
+│   ├── src/
+│   │   ├── components/       # Reusable components (Navbar, ChatInput, etc.)
+│   │   ├── pages/            # Core views (Home, Login, Dashboard, Whiteboard, Coding, etc.)
+│   │   ├── types/            # TypeScript type definitions
+│   │   ├── config.ts         # Centralized API and WebSocket URL routing
+│   │   └── main.tsx          # React application root
+│   ├── vercel.json           # Vercel SPA routing redirects configuration
+│   └── package.json          # Node dependencies
 ```
 
 ---
 
-## 🚀 Installation
+## 🚀 Local Development Setup
 
-Clone the repository
+### Prerequisite
+* Python 3.10+ installed
+* Node.js v18+ installed
+* MongoDB local instance or MongoDB Atlas Cluster URL
 
+### 1. Backend Setup
+Navigate to the `backend/` directory:
+```bash
+cd backend
 ```
-git clone https://github.com/your-username/ai-learning-assistant.git
+
+Create and activate a virtual environment:
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# macOS/Linux
+python3 -m venv venv
+source venv/bin/activate
 ```
 
-Navigate into the project folder
-
+Install backend dependencies:
+```bash
+pip install -r requirements.txt
 ```
-cd ai-learning-assistant
+
+Create a `.env` file in the `backend/` folder and add:
+```env
+MONGODB_URL=mongodb+srv://your_username:your_password@cluster.mongodb.net/?retryWrites=true&w=majority
+GROQ_API_KEY=your_groq_api_key_here
+JWT_SECRET=your_super_secret_jwt_key
+PORT=8000
 ```
 
-Install dependencies
-
+Start the FastAPI backend server:
+```bash
+uvicorn main:app --reload
 ```
+
+---
+
+### 2. Frontend Setup
+Open a new terminal and navigate to the `frontend/` directory:
+```bash
+cd frontend
+```
+
+Install npm dependencies:
+```bash
 npm install
 ```
 
-Start the development server
-
+Create a `.env` file in the `frontend/` folder for local environment variables:
+```env
+VITE_API_URL=http://localhost:8000
 ```
+
+Start the Vite development server:
+```bash
 npm run dev
 ```
 
-Open in browser
-
-```
-http://localhost:5173
-```
-
 ---
 
-## 📊 Application Routes
+## ☁️ Deployment Configuration
 
-| Route        | Description                |
-| ------------ | -------------------------- |
-| `/`          | Home Page                  |
-| `/login`     | User Login                 |
-| `/dashboard` | Main application dashboard |
-| `/mindmap`   | AI-generated mind maps     |
-| `/chatbot`   | AI chatbot interface       |
-| `/summary`   | AI text summarization      |
+### Backend (Render)
+1. Set the **Root Directory** to `backend`.
+2. Use **Build Command**: `pip install -r requirements.txt`.
+3. Use **Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT`.
+4. Inject environment variables: `MONGODB_URL`, `GROQ_API_KEY`, and `JWT_SECRET`.
 
----
-
-## 🔮 Future Improvements
-
-* LLM integration (OpenAI / Gemini)
-* RAG-based knowledge retrieval
-* User authentication system
-* Notebook storage
-* AI quiz generation
-* Vector database integration
-
----
-
-## 🎯 Purpose
-
-This project demonstrates the integration of **modern frontend architecture with AI-powered learning tools**, making it suitable for **educational platforms, productivity tools, and knowledge management systems**.
+### Frontend (Vercel)
+1. Import repository and set **Root Directory** to `frontend`.
+2. Vercel automatically selects the **Vite** framework preset.
+3. Add Environment Variable:
+   - Name: `VITE_API_URL`
+   - Value: `https://your-backend-render-url.onrender.com`
+4. The custom `vercel.json` will automatically route any sub-paths to `index.html` to prevent 404 errors on page refresh.
 
 ---
 
 ## 👨‍💻 Author
-
 **Khushal**
-
-AI & Full Stack Developer
+*AI & Full Stack Developer*
