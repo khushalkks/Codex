@@ -12,3 +12,5 @@ pyjwt
 bcrypt
 requests
 python-multipart
+PyPDF2
+
