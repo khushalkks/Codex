@@ -13,4 +13,5 @@ bcrypt
 requests
 python-multipart
 PyPDF2
-
+numpy
+scikit-learn
