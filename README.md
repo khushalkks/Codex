@@ -1,4 +1,14 @@
 # CodexCraft 🚀
+
+<p align="left">
+  <img src="https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB" />
+  <img src="https://img.shields.io/badge/Socket.io-010101?style=for-the-badge&logo=socket.io&logoColor=white" alt="Socket.io" />
+  <img src="https://img.shields.io/badge/Vite-B736FF?style=for-the-badge&logo=vite&logoColor=FFD62B" alt="Vite" />
+</p>
+
 > A State-of-the-Art AI-Powered Collaborative Learning & Coding Suite.
 
 CodexCraft is a premium, feature-rich full-stack application that integrates cutting-edge **Multi-Agent AI cognitive tools** with **real-time multiplayer collaboration** for developers and students. 
