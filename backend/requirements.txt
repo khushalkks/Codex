@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+python-socketio
+motor
+pymongo
+python-dotenv
+groq
+PyMuPDF
+python-docx
+pydantic
+pyjwt
+bcrypt
+requests
+python-multipart
