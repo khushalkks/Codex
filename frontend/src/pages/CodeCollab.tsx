@@ -8,6 +8,7 @@ import {
   Copy, Check, Link, PlusCircle, LogIn, ArrowRight
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { API_BASE_URL } from '../config';
 
 /* ─── Types ──────────────────────────────────────── */
 interface OnlineUser   { id: string; name: string }
@@ -247,7 +248,7 @@ export default function CodeCollab() {
 
   // ─── Create socket ONCE on mount ──────────────────
   useEffect(() => {
-    const socket = io('http://127.0.0.1:8000', {
+    const socket = io(API_BASE_URL, {
       transports: ['websocket'],  // skip polling → instant connect
       reconnection: true,
       reconnectionAttempts: 20,
@@ -436,7 +437,7 @@ export default function CodeCollab() {
     setShowTerminal(true); setOutput([]); setIsExecuting(true);
     addLine(`❯ Running ${LANGUAGES.find(l => l.id===language)?.name ?? language}...`, 'system');
     try {
-      const res  = await fetch('http://127.0.0.1:8000/api/code/execute', {
+      const res  = await fetch(`${API_BASE_URL}/api/code/execute`, {
         method: 'POST', headers: { 'Content-Type':'application/json' },
         body: JSON.stringify({ code, language }),
       });
@@ -453,7 +454,7 @@ export default function CodeCollab() {
   const triggerReview = async () => {
     setShowReview(true); setIsReviewing(true); setReviewResult('');
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/code/review', {
+      const res = await fetch(`${API_BASE_URL}/api/code/review`, {
         method: 'POST', headers: { 'Content-Type':'application/json' },
         body: JSON.stringify({ code, language }),
       });

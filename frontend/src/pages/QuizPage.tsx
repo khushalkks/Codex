@@ -12,6 +12,7 @@ import {
   Trophy
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { API_BASE_URL } from "../config";
 
 type Difficulty = "easy" | "medium" | "hard";
 type ToastType = "success" | "error" | "info";
@@ -20,7 +21,7 @@ interface Toast {
   type: ToastType;
 }
 
-const API = "http://localhost:8000/api";
+const API = `${API_BASE_URL}/api`;
 const ACCEPTED = [".pdf", ".docx", ".txt"];
 
 function formatBytes(bytes: number): string {

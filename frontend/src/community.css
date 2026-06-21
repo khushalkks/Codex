@@ -25,7 +25,7 @@
   background-color: #313338;
   display: flex;
   align-items: center;
-  justifyContent: center;
+  justify-content: center;
   margin-bottom: 8px;
   cursor: pointer;
   transition: all 0.2s ease;

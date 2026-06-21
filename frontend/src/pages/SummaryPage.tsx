@@ -2,32 +2,33 @@ import { useState, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Archive, FileText, File as FileIcon, Image as ImageIcon, Sparkles, Clock, Paperclip, AlertCircle, Lightbulb } from "lucide-react";
+import { API_BASE_URL } from "../config";
 
-const fmt = (d) =>
+const fmt = (d: any) =>
   new Date(d).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
-const truncate = (str, n = 60) => (str.length > n ? str.slice(0, n) + "…" : str);
+const truncate = (str: string, n = 60) => (str.length > n ? str.slice(0, n) + "…" : str);
 
 export default function SummaryPage() {
   const navigate = useNavigate();
-  const fileInputRef = useRef(null);
-  const dropRef = useRef(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropRef = useRef<HTMLDivElement>(null);
 
-  const [file, setFile] = useState(null);
+  const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [history, setHistory] = useState([]);
-  const [selectedIdx, setSelectedIdx] = useState(null);
+  const [history, setHistory] = useState<any[]>([]);
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [error, setError] = useState("");
 
-  const onDragOver = useCallback((e) => { e.preventDefault(); setDragging(true); }, []);
+  const onDragOver = useCallback((e: React.DragEvent) => { e.preventDefault(); setDragging(true); }, []);
   const onDragLeave = useCallback(() => setDragging(false), []);
-  const onDrop = useCallback((e) => {
+  const onDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault(); setDragging(false);
     const f = e.dataTransfer.files[0];
     if (f) pickFile(f);
   }, []);
 
-  const pickFile = (f) => {
+  const pickFile = (f: File) => {
     const allowed = ["application/pdf", "text/plain",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "image/png", "image/jpeg", "image/webp"];
@@ -42,7 +43,7 @@ export default function SummaryPage() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await fetch("http://127.0.0.1:8000/api/summarize", {
+      const res = await fetch(`${API_BASE_URL}/api/summarize`, {
         method: "POST",
         body: formData,
       });
@@ -55,7 +56,7 @@ export default function SummaryPage() {
       const data = await res.json();
       const rawSummary = data.summary || data.text || data.result || JSON.stringify(data);
 
-      const lines = rawSummary.trim().split("\n").filter(l => l.trim());
+      const lines = rawSummary.trim().split("\n").filter((l: string) => l.trim());
       let title = file.name.replace(/\.[^.]+$/, "");
       let summaryText = rawSummary;
       const firstLine = lines[0]?.replace(/^#+\s*/, "").replace(/\*+/g, "").trim();
@@ -68,7 +69,7 @@ export default function SummaryPage() {
       setHistory(prev => [entry, ...prev]);
       setSelectedIdx(0);
       setFile(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       setError(err.message || "Summary generate nahi ho saki. Dobara try karein.");
     } finally {
@@ -78,9 +79,9 @@ export default function SummaryPage() {
 
   const displayed = selectedIdx !== null ? history[selectedIdx] : null;
 
-  const renderSummary = (text) => {
+  const renderSummary = (text: string) => {
     if (!text) return null;
-    return text.split("\n").map((line, i) => {
+    return text.split("\n").map((line: string, i: number) => {
       const t = line.trim();
       if (!t) return <div key={i} style={{ height: 10 }} />;
       if (/^#{1,3}\s/.test(t)) return <h3 key={i} style={{ fontFamily: "'Inter',sans-serif", fontSize: "1.2rem", fontWeight: 700, color: "#111827", margin: "20px 0 8px" }}>{t.replace(/^#+\s*/, "").replace(/\*+/g, "")}</h3>;
@@ -311,7 +312,7 @@ export default function SummaryPage() {
                   <input
                     ref={fileInputRef} type="file" style={{ display: "none" }}
                     accept=".pdf,.txt,.docx,.png,.jpg,.jpeg,.webp"
-                    onChange={(e) => { if (e.target.files[0]) pickFile(e.target.files[0]); e.target.value = ""; }}
+                    onChange={(e) => { if (e.target.files?.[0]) pickFile(e.target.files[0]); e.target.value = ""; }}
                   />
 
                   {file && (

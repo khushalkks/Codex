@@ -11,8 +11,9 @@ import {
   BookOpen
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { API_BASE_URL } from "../config";
 
-const API_BASE = "http://127.0.0.1:8000/api";
+const API_BASE = `${API_BASE_URL}/api`;
 
 type Flashcard = {
   question: string;

@@ -18,6 +18,7 @@ import {
   ShieldCheck
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { API_BASE_URL } from "../config";
 
 type PlanResponse = {
   days_left: number;
@@ -55,7 +56,7 @@ export default function StudyPlan() {
     const subjectList = subjects.split(",").map((s) => s.trim()).filter(s => s !== "");
 
     try {
-      const res = await fetch("http://localhost:8000/api/generate-study-plan", {
+      const res = await fetch(`${API_BASE_URL}/api/generate-study-plan`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -356,7 +357,7 @@ export default function StudyPlan() {
                           {Object.entries(day).filter(([k]) => k !== "day").map(([sub, hrs]) => (
                              <div key={sub} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                                 <span style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>{sub}</span>
-                                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#1e293b' }}>{hrs} hours</span>
+                                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#1e293b' }}>{String(hrs)} hours</span>
                              </div>
                           ))}
                        </div>

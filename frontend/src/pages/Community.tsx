@@ -6,6 +6,7 @@ import {
 import '../index.css';
 import '../community.css';
 import DiscordSettings from '../components/chat/DiscordSettings';
+import { API_BASE_URL, getWsUrl } from '../config';
 
 interface Server {
   id: string;
@@ -77,7 +78,7 @@ const Community = () => {
 
     const fetchServers = async () => {
         try {
-            const res = await fetch(`http://127.0.0.1:8000/api/community/servers`);
+            const res = await fetch(`${API_BASE_URL}/api/community/servers`);
             if (res.ok) {
                 const data = await res.json();
                 setServers(data);
@@ -93,7 +94,7 @@ const Community = () => {
     const fetchChannels = useCallback(async () => {
         if (!activeServer) return;
         try {
-            const res = await fetch(`http://127.0.0.1:8000/api/community/channels/${activeServer}`);
+            const res = await fetch(`${API_BASE_URL}/api/community/channels/${activeServer}`);
             if (res.ok) {
                 const data = await res.json();
                 setChannels(data);
@@ -111,7 +112,7 @@ const Community = () => {
     const fetchMessages = useCallback(async () => {
         if (!activeChannel) return;
         try {
-            const res = await fetch(`http://127.0.0.1:8000/api/community/messages/${activeChannel}`);
+            const res = await fetch(`${API_BASE_URL}/api/community/messages/${activeChannel}`);
             if (res.ok) {
                 const data = await res.json();
                 setMessages(data);
@@ -140,7 +141,7 @@ const Community = () => {
 
         if (wsRef.current) wsRef.current.close();
 
-        const wsUrl = `ws://127.0.0.1:8000/api/ws/community/${activeChannel}/${currentUser.id}/${encodeURIComponent(currentUser.name)}`;
+        const wsUrl = getWsUrl(`/api/ws/community/${activeChannel}/${currentUser.id}/${encodeURIComponent(currentUser.name)}`);
         const ws = new WebSocket(wsUrl);
         wsRef.current = ws;
 
@@ -195,7 +196,7 @@ const Community = () => {
             const formData = new FormData();
             formData.append("file", selectedFile);
             try {
-                const res = await fetch("http://127.0.0.1:8000/api/community/upload", {
+                const res = await fetch(`${API_BASE_URL}/api/community/upload`, {
                     method: "POST",
                     body: formData
                 });
@@ -217,15 +218,14 @@ const Community = () => {
     const handleDeleteMessage = async (msgId: string) => {
         if (!currentUser) return;
         try {
-            await fetch(`http://127.0.0.1:8000/api/community/messages/${msgId}?user_id=${currentUser.id}`, { method: 'DELETE' });
+            await fetch(`${API_BASE_URL}/api/community/messages/${msgId}?user_id=${currentUser.id}`, { method: 'DELETE' });
         } catch (e) { console.error(e); }
     };
 
     const handleEditMessageSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
         if (!currentUser || !editingMsgId || !editContent.trim()) return;
         try {
-            await fetch(`http://127.0.0.1:8000/api/community/messages/${editingMsgId}`, {
+            await fetch(`${API_BASE_URL}/api/community/messages/${editingMsgId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ content: editContent, user_id: currentUser.id })
@@ -240,7 +240,7 @@ const Community = () => {
         if (newServerName.trim()) {
             const initials = newServerName.substring(0, 2).toUpperCase();
             try {
-                const res = await fetch(`http://127.0.0.1:8000/api/community/servers`, {
+                const res = await fetch(`${API_BASE_URL}/api/community/servers`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name: newServerName.trim(), initials })
@@ -260,7 +260,7 @@ const Community = () => {
         e.preventDefault();
         if (newChannelName.trim() && activeServer) {
             try {
-                const res = await fetch(`http://127.0.0.1:8000/api/community/channels`, {
+                const res = await fetch(`${API_BASE_URL}/api/community/channels`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name: newChannelName.trim().replace(/\s+/g, '-').toLowerCase(), server_id: activeServer })

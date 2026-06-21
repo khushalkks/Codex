@@ -15,6 +15,7 @@ import {
   Stars,
   User
 } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -63,7 +64,7 @@ export default function LoginPage() {
 
       // Register API Call
       try {
-        const res = await fetch("http://localhost:8000/api/auth/register", {
+        const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name: nameTrim, email: emailTrim, password }),
@@ -86,7 +87,7 @@ export default function LoginPage() {
     } else {
       // Login API Call
       try {
-        const res = await fetch("http://localhost:8000/api/auth/login", {
+        const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: emailTrim, password }),

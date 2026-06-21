@@ -7,6 +7,7 @@ import {
   Trash2, Download, Share2, Undo2, Redo2, MousePointer, Copy, Check,
   Plus, LogIn, Sparkles
 } from "lucide-react";
+import { API_BASE_URL } from "../config";
 
 // ─── Types ──────────────────────────────────────────────────────────
 interface Point { x: number; y: number }
@@ -190,7 +191,7 @@ function WhiteboardLobby({ initialRoom, onJoin }: { initialRoom?: string; onJoin
   const [savedBoards, setSavedBoards] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/whiteboard/list")
+    fetch(`${API_BASE_URL}/api/whiteboard/list`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -357,7 +358,7 @@ export default function WhiteboardPage() {
 
   // ─── Socket.IO Setup ──────────────────────────────────────────────
   useEffect(() => {
-    const socket = io("http://127.0.0.1:8000", {
+    const socket = io(API_BASE_URL, {
       transports: ["websocket"],
       reconnection: true,
       reconnectionAttempts: 10,

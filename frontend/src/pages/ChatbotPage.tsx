@@ -19,9 +19,10 @@ import {
   Cpu
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { API_BASE_URL } from "../config";
 
-const CHAT_API = "http://127.0.0.1:8000/api/chat";
-const CONTEXT_UPLOAD_API = "http://127.0.0.1:8000/api/chat/context-upload";
+const CHAT_API = `${API_BASE_URL}/api/chat`;
+const CONTEXT_UPLOAD_API = `${API_BASE_URL}/api/chat/context-upload`;
 
 const formatTime = (ts: number) =>
   new Date(ts).toLocaleString("en-IN", { hour: "2-digit", minute: "2-digit" });

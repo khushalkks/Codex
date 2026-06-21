@@ -11,6 +11,7 @@ import {
   CheckCircle2
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { API_BASE_URL } from "../config";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type Step = 1 | 2 | 3;
@@ -21,7 +22,7 @@ interface Toast {
   type: ToastType;
 }
 
-const API = "http://localhost:8000/api";
+const API = `${API_BASE_URL}/api`;
 const ACCEPTED = [".pdf", ".docx", ".txt"];
 
 function formatBytes(bytes: number): string {
