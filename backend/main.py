@@ -1,10 +1,17 @@
+import sys
+import os
+
+# Force virtual environment site-packages to be loaded first (fixes subprocess spawning issues)
+venv_site_packages = os.path.join(os.path.dirname(__file__), "venv", "Lib", "site-packages")
+if os.path.exists(venv_site_packages) and venv_site_packages not in sys.path:
+    sys.path.insert(0, venv_site_packages)
+
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import socketio as _sio_lib
 from dotenv import load_dotenv
-import os
 
 load_dotenv()
 
@@ -19,6 +26,8 @@ from routes.flashcards import router as flashcards_router
 from routes.chatbot import router as chatbot_router
 from config.db import connect_to_mongo, close_mongo_connection
 from socket_coding import sio          # Socket.IO AsyncServer instance
+from routes.whiteboard import router as whiteboard_router
+from routes.auth import router as auth_router
 from summarizer_app.study_plan import router as study_plan_router
 
 
@@ -63,6 +72,8 @@ fastapi_app.include_router(quiz_router,         prefix="/api")
 fastapi_app.include_router(flashcards_router,   prefix="/api")
 fastapi_app.include_router(chatbot_router,      prefix="/api")
 fastapi_app.include_router(study_plan_router,   prefix="/api")
+fastapi_app.include_router(whiteboard_router,   prefix="/api")
+fastapi_app.include_router(auth_router,         prefix="/api")
 
 
 @fastapi_app.get("/")

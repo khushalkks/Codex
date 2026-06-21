@@ -187,6 +187,18 @@ function WhiteboardLobby({ initialRoom, onJoin }: { initialRoom?: string; onJoin
     try { return JSON.parse(localStorage.getItem('user') || '{}').name || ''; } catch { return ''; }
   });
   const [copied, setCopied] = useState(false);
+  const [savedBoards, setSavedBoards] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("http://localhost:8000/api/whiteboard/list")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setSavedBoards(data);
+        }
+      })
+      .catch(err => console.error("Error loading boards:", err));
+  }, []);
 
   const handleGo = () => {
     const roomToUse = tab === 'create' ? generatedRoom : joinInput.trim().toUpperCase();
@@ -208,6 +220,7 @@ function WhiteboardLobby({ initialRoom, onJoin }: { initialRoom?: string; onJoin
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="wb-lobby-card"
+        style={{ width: '460px', maxHeight: '90vh', overflowY: 'auto' }}
       >
         <div className="wb-lobby-header">
           <div className="wb-lobby-icon-wrap">
@@ -265,6 +278,48 @@ function WhiteboardLobby({ initialRoom, onJoin }: { initialRoom?: string; onJoin
           <button className="wb-lobby-submit" onClick={handleGo}>
             {tab === 'create' ? 'Create & Launch' : 'Enter Whiteboard'}
           </button>
+
+          {/* List of Saved Canvas Boards */}
+          {savedBoards.length > 0 && (
+            <div style={{ marginTop: '28px', paddingTop: '20px', borderTop: '1px solid var(--glass-border)' }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#818cf8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '10px' }}>
+                Saved Canvas Boards
+              </label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '150px', overflowY: 'auto', paddingRight: '4px' }}>
+                {savedBoards.map((b: any) => (
+                  <div 
+                    key={b.roomId} 
+                    onClick={() => {
+                      setTab('join');
+                      setJoinInput(b.roomId);
+                    }}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      background: 'rgba(0,0,0,0.2)',
+                      padding: '10px 14px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--glass-border)',
+                      cursor: 'pointer',
+                      transition: '0.2s',
+                    }}
+                    onMouseOver={e => {
+                      e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)';
+                      e.currentTarget.style.background = 'rgba(99,102,241,0.05)';
+                    }}
+                    onMouseOut={e => {
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                      e.currentTarget.style.background = 'rgba(0,0,0,0.2)';
+                    }}
+                  >
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}>Room: {b.roomId}</span>
+                    <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>By: {b.lastSavedBy || 'User'}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </motion.div>
     </div>

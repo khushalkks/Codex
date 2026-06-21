@@ -3,6 +3,8 @@ CortexCraft IDE — Socket.IO real-time collaboration server.
 Events: join_room, code_change, language_change, cursor_move
 """
 import socketio
+import datetime
+from config.db import get_database
 
 sio = socketio.AsyncServer(
     async_mode="asgi",
@@ -160,8 +162,19 @@ async def wb_join(sid, data):
     print(f"[WHITEBOARD] 📥 JOIN sid={sid} room={room_id} user={user_name}")
 
     if room_id not in wb_rooms:
+        db = get_database()
+        elements = []
+        if db is not None:
+            try:
+                board = await db.whiteboards.find_one({"roomId": room_id})
+                if board:
+                    elements = board.get("elements", [])
+                    print(f"[WHITEBOARD] 💾 Loaded {len(elements)} elements from MongoDB for room {room_id}")
+            except Exception as e:
+                print(f"[WHITEBOARD] Error loading from DB: {e}")
+
         wb_rooms[room_id] = {
-            "elements": [],
+            "elements": elements,
             "users": {},
         }
     
@@ -192,6 +205,23 @@ async def wb_draw(sid, data):
     await sio.emit("wb_update", {"element": element}, room=room_id, skip_sid=sid)
     print(f"[WHITEBOARD] ✏️ DRAW in {room_id} (Elements: {len(wb_rooms[room_id]['elements'])})")
 
+    # Persist to MongoDB
+    db = get_database()
+    if db is not None:
+        try:
+            await db.whiteboards.update_one(
+                {"roomId": room_id},
+                {
+                    "$set": {
+                        "elements": wb_rooms[room_id]["elements"],
+                        "updatedAt": datetime.datetime.utcnow()
+                    }
+                },
+                upsert=True
+            )
+        except Exception as e:
+            print(f"[WHITEBOARD] DB Save Error in wb_draw: {e}")
+
 
 @sio.on("wb_clear")
 async def wb_clear(sid, data):
@@ -202,6 +232,23 @@ async def wb_clear(sid, data):
     wb_rooms[room_id]["elements"] = []
     await sio.emit("wb_clear_all", {}, room=room_id, skip_sid=sid)
     print(f"[WHITEBOARD] 🧹 CLEAR in {room_id}")
+
+    # Persist to MongoDB
+    db = get_database()
+    if db is not None:
+        try:
+            await db.whiteboards.update_one(
+                {"roomId": room_id},
+                {
+                    "$set": {
+                        "elements": [],
+                        "updatedAt": datetime.datetime.utcnow()
+                    }
+                },
+                upsert=True
+            )
+        except Exception as e:
+            print(f"[WHITEBOARD] DB Save Error in wb_clear: {e}")
 
 
 @sio.on("wb_undo")
@@ -214,3 +261,20 @@ async def wb_undo(sid, data):
     # Sync full state on undo to ensure everyone is on the same page
     await sio.emit("wb_init", {"elements": wb_rooms[room_id]["elements"]}, room=room_id)
     print(f"[WHITEBOARD] ↩️ UNDO in {room_id} (Remaining: {len(wb_rooms[room_id]['elements'])})")
+
+    # Persist to MongoDB
+    db = get_database()
+    if db is not None:
+        try:
+            await db.whiteboards.update_one(
+                {"roomId": room_id},
+                {
+                    "$set": {
+                        "elements": wb_rooms[room_id]["elements"],
+                        "updatedAt": datetime.datetime.utcnow()
+                    }
+                },
+                upsert=True
+            )
+        except Exception as e:
+            print(f"[WHITEBOARD] DB Save Error in wb_undo: {e}")

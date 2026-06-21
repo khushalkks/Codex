@@ -1,3 +1,4 @@
+# Trigger uvicorn auto-reload after installing missing packages
 from fastapi import APIRouter, UploadFile, File, Request, HTTPException
 from services.resume_service import analyze_resume
 from utils.file_parser import extract_text_from_pdf

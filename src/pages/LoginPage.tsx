@@ -12,24 +12,111 @@ import {
   CheckCircle2,
   Lock,
   Globe,
-  Stars
+  Stars,
+  User
 } from 'lucide-react';
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+  
+  // Form states
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  const handleLogin = () => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      localStorage.setItem('user', JSON.stringify({
-        name: 'Curious Scholar',
-        email: 'scholar@cortexcraft.ai',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix'
-      }));
+    setError(null);
+    setSuccess(null);
+
+    const emailTrim = email.trim();
+    const nameTrim = name.trim();
+
+    if (!emailTrim || !password) {
+      setError("Email and Password are required.");
       setLoading(false);
-      window.location.href = '/home';
-    }, 1800);
+      return;
+    }
+
+    if (isSignUp) {
+      if (!nameTrim) {
+        setError("Please enter your name.");
+        setLoading(false);
+        return;
+      }
+      if (password !== confirmPassword) {
+        setError("Passwords do not match.");
+        setLoading(false);
+        return;
+      }
+      if (password.length < 6) {
+        setError("Password must be at least 6 characters long.");
+        setLoading(false);
+        return;
+      }
+
+      // Register API Call
+      try {
+        const res = await fetch("http://localhost:8000/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: nameTrim, email: emailTrim, password }),
+        });
+        const data = await res.json();
+        
+        if (!res.ok) {
+          throw new Error(data.detail || "Registration failed.");
+        }
+        
+        setSuccess("Registration successful! You can now log in.");
+        setIsSignUp(false); // Switch to login mode
+        setPassword("");
+        setConfirmPassword("");
+      } catch (err: any) {
+        setError(err.message || "Something went wrong.");
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // Login API Call
+      try {
+        const res = await fetch("http://localhost:8000/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: emailTrim, password }),
+        });
+        const data = await res.json();
+        
+        if (!res.ok) {
+          throw new Error(data.detail || "Invalid email or password.");
+        }
+        
+        // Save user token and profile info
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+        
+        // Redirect to homepage
+        window.location.href = '/home';
+      } catch (err: any) {
+        setError(err.message || "Invalid credentials. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const toggleMode = () => {
+    setIsSignUp(!isSignUp);
+    setError(null);
+    setSuccess(null);
+    setPassword("");
+    setConfirmPassword("");
   };
 
   return (
@@ -112,7 +199,7 @@ export default function LoginPage() {
         </motion.div>
       </div>
 
-      {/* Right Side: Login Form */}
+      {/* Right Side: Authentication Form */}
       <div style={{ 
         flex: 0.8, 
         background: '#0a0f1e', 
@@ -128,15 +215,48 @@ export default function LoginPage() {
           animate={{ opacity: 1, x: 0 }}
           style={{ width: '100%', maxWidth: '400px' }}
         >
-          <div style={{ marginBottom: '48px', textAlign: 'center' }}>
-            <div style={{ display: 'inline-flex', background: '#4F46E5', color: '#fff', width: 56, height: 56, borderRadius: '16px', alignItems: 'center', justifyContent: 'center', marginBottom: 24, boxShadow: '0 10px 25px rgba(79, 70, 229, 0.3)' }}>
+          <div style={{ marginBottom: '32px', textAlign: 'center' }}>
+            <div style={{ display: 'inline-flex', background: '#4F46E5', color: '#fff', width: 56, height: 56, borderRadius: '16px', alignItems: 'center', justifyContent: 'center', marginBottom: 20, boxShadow: '0 10px 25px rgba(79, 70, 229, 0.3)' }}>
               <GraduationCap size={28} />
             </div>
-            <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: 12 }}>Welcome Back</h2>
-            <p style={{ color: '#64748b' }}>Enter your credentials to access your workspace.</p>
+            <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: 12 }}>
+              {isSignUp ? 'Create Account' : 'Welcome Back'}
+            </h2>
+            <p style={{ color: '#64748b' }}>
+              {isSignUp ? 'Register to start your personalized roadmap.' : 'Enter your credentials to access your workspace.'}
+            </p>
           </div>
 
-          <div style={{ display: 'grid', gap: '20px' }}>
+          <form onSubmit={handleFormSubmit} style={{ display: 'grid', gap: '20px' }}>
+            {error && (
+              <div style={{ padding: '12px 16px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#f87171', borderRadius: '10px', fontSize: '0.85rem', fontWeight: 600 }}>
+                ⚠️ {error}
+              </div>
+            )}
+            
+            {success && (
+              <div style={{ padding: '12px 16px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', color: '#34d399', borderRadius: '10px', fontSize: '0.85rem', fontWeight: 600 }}>
+                ✓ {success}
+              </div>
+            )}
+
+            {isSignUp && (
+              <div style={{ position: 'relative' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#94a3b8', marginBottom: '8px', marginLeft: '4px' }}>Full Name</label>
+                <div style={{ position: 'relative' }}>
+                  <User style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#475569' }} size={18} />
+                  <input 
+                    type="text" 
+                    placeholder="John Doe"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    required
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', padding: '14px 14px 14px 48px', borderRadius: '12px', color: '#fff', fontSize: '0.95rem', outline: 'none', transition: '0.3s' }}
+                  />
+                </div>
+              </div>
+            )}
+
             <div style={{ position: 'relative' }}>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#94a3b8', marginBottom: '8px', marginLeft: '4px' }}>Email Address</label>
               <div style={{ position: 'relative' }}>
@@ -144,6 +264,9 @@ export default function LoginPage() {
                 <input 
                   type="email" 
                   placeholder="name@example.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
                   style={{ width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', padding: '14px 14px 14px 48px', borderRadius: '12px', color: '#fff', fontSize: '0.95rem', outline: 'none', transition: '0.3s' }}
                 />
               </div>
@@ -156,13 +279,33 @@ export default function LoginPage() {
                 <input 
                   type="password" 
                   placeholder="••••••••"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
                   style={{ width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', padding: '14px 14px 14px 48px', borderRadius: '12px', color: '#fff', fontSize: '0.95rem', outline: 'none', transition: '0.3s' }}
                 />
               </div>
             </div>
 
+            {isSignUp && (
+              <div style={{ position: 'relative' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#94a3b8', marginBottom: '8px', marginLeft: '4px' }}>Confirm Password</label>
+                <div style={{ position: 'relative' }}>
+                  <Lock style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#475569' }} size={18} />
+                  <input 
+                    type="password" 
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    required
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', padding: '14px 14px 14px 48px', borderRadius: '12px', color: '#fff', fontSize: '0.95rem', outline: 'none', transition: '0.3s' }}
+                  />
+                </div>
+              </div>
+            )}
+
             <button 
-              onClick={handleLogin}
+              type="submit"
               disabled={loading}
               style={{ 
                 background: '#fff', 
@@ -186,43 +329,19 @@ export default function LoginPage() {
               {loading ? (
                 <div style={{ width: 20, height: 20, border: '3px solid #020617', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
               ) : (
-                <>Sign in to Account <ArrowRight size={20} /></>
+                <>{isSignUp ? 'Sign up for Free' : 'Sign in to Account'} <ArrowRight size={20} /></>
               )}
             </button>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', margin: '12px 0' }}>
-              <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }}></div>
-              <span style={{ fontSize: '0.8rem', color: '#475569', fontWeight: 600 }}>OR CONTINUE WITH</span>
-              <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }}></div>
-            </div>
-
-            <button 
-              onClick={handleLogin}
-              style={{ 
-                background: 'rgba(255,255,255,0.03)', 
-                color: '#fff', 
-                border: '1px solid rgba(255,255,255,0.1)', 
-                padding: '14px', 
-                borderRadius: '12px', 
-                fontSize: '0.95rem', 
-                fontWeight: 600, 
-                cursor: 'pointer', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                gap: 12,
-                transition: '0.3s'
-              }}
-              onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
-              onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
-            >
-              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style={{ width: 18 }} />
-              Google Authentication
-            </button>
-          </div>
+          </form>
 
           <p style={{ textAlign: 'center', marginTop: '40px', fontSize: '0.9rem', color: '#64748b' }}>
-            Don't have an account? <span style={{ color: '#818cf8', fontWeight: 600, cursor: 'pointer' }}>Sign up for free</span>
+            {isSignUp ? 'Already have an account? ' : "Don't have an account? "} 
+            <span 
+              onClick={toggleMode}
+              style={{ color: '#818cf8', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
+            >
+              {isSignUp ? 'Sign in' : 'Sign up for free'}
+            </span>
           </p>
         </motion.div>
 
