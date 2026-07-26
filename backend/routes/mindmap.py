@@ -32,12 +32,12 @@ async def upload_file(file: UploadFile = File(...)) -> dict:
     except RequestsReadTimeout:
         raise HTTPException(
             status_code=504,
-            detail="Ollama ne reply dene me time liya. Thoda wait karein / model load ho jane dein. (Keywords step timeout)",
+            detail="Groq API request timeout occurred. Please try again. (Keywords step timeout)",
         )
     except RequestsConnectionError:
         raise HTTPException(
             status_code=503,
-            detail="Ollama server reachable nahi hai. Pehle `ollama serve` chalao aur verify karo (localhost:11434).",
+            detail="Could not connect to Groq API. Please check your internet connection or API status.",
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Mindmap generate failed: {e}")
@@ -60,12 +60,12 @@ async def generate_for_topic(req: MindmapTopicRequest) -> dict:
     except RequestsReadTimeout:
         raise HTTPException(
             status_code=504,
-            detail="Ollama ne reply dene me time liya. Thoda wait karein / model load ho jane dein. (Tree step timeout)",
+            detail="Groq API request timeout occurred. Please try again. (Tree step timeout)",
         )
     except RequestsConnectionError:
         raise HTTPException(
             status_code=503,
-            detail="Ollama server reachable nahi hai. Pehle `ollama serve` chalao aur verify karo (localhost:11434).",
+            detail="Could not connect to Groq API. Please check your internet connection or API status.",
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Mindmap topic generate failed: {e}")

@@ -29,16 +29,23 @@ async def flashcards_from_file(file: UploadFile = File(...)) -> dict:
     if not text or not text.strip():
         raise HTTPException(status_code=400, detail="Document text empty nikla.")
 
+    # Index doc in RAG
+    try:
+        from services.rag_service import save_document
+        await save_document(file.filename, text)
+    except Exception as e:
+        print(f"[RAG] Failed to index document during flashcards generation: {e}")
+
     try:
         cards = await run_in_threadpool(generate_flashcards, text)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Flashcards generate failed: {e}")
 
     if isinstance(cards, dict) and cards.get("error"):
-        raise HTTPException(status_code=502, detail=f"Ollama flashcards error: {cards['error']}")
+        raise HTTPException(status_code=502, detail=f"Groq flashcards error: {cards['error']}")
 
     if not isinstance(cards, list) or not cards:
-        raise HTTPException(status_code=502, detail="Flashcards parse nahi hue. Ollama output check karo.")
+        raise HTTPException(status_code=502, detail="Flashcards parse nahi hue. Groq output check karo.")
 
     normalized = []
     for c in cards:

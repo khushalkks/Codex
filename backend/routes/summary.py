@@ -43,6 +43,13 @@ async def summarize_document(file: UploadFile = File(...)) -> dict:
     if not text or not text.strip():
         raise HTTPException(status_code=400, detail="Document text empty nikla.")
 
+    # Save to MongoDB vector store for RAG
+    from services.rag_service import save_document
+    try:
+        await save_document(file.filename, text)
+    except Exception as e:
+        print(f"[RAG] Failed to index document during summarization: {e}")
+
     try:
         summary = await run_in_threadpool(summarize_text, text)
         if not summary or not summary.strip():

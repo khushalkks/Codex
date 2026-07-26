@@ -30,3 +30,4 @@ __pycache__/
 backend/__pycache__/
 backend/uploads/
 node_modules/
+backend/mongodb_data/

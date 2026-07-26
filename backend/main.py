@@ -13,7 +13,8 @@ from fastapi.staticfiles import StaticFiles
 import socketio as _sio_lib
 from dotenv import load_dotenv
 
-load_dotenv()
+env_path = os.path.join(os.path.dirname(__file__), ".env")
+load_dotenv(dotenv_path=env_path, override=True)
 
 from routes import resume
 from summarizer_app.interview_routes import router as interview_router

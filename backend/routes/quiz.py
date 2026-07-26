@@ -27,6 +27,17 @@ async def generate_quiz(
     bio = io.BytesIO(content)
     bio.filename = file.filename.lower()
 
+    # Index doc in RAG
+    try:
+        from summarizer_app.mindmap import extract_text_from_file
+        text = extract_text_from_file(bio)
+        if text and text.strip():
+            from services.rag_service import save_document
+            await save_document(file.filename, text)
+    except Exception as e:
+        print(f"[RAG] Failed to index document during quiz generation: {e}")
+
+    bio.seek(0)
     try:
         result = await run_in_threadpool(generate_quiz_from_upload, bio, difficulty)
     except Exception as e:

@@ -14,12 +14,12 @@ load_dotenv()
 # MCQ Quiz Generator (Groq Powered)
 # ──────────────────────────────────────────────
 
-def generate_mcq_quiz(summary: str, level: str, num_questions: int = 5) -> dict[str, Any]:
+def generate_mcq_quiz(context: str, level: str, num_questions: int = 5) -> dict[str, Any]:
     level = (level or "").strip().lower()
     
     level_instructions = {
         "easy":   "Easy: direct factual questions, definitions, and simple comprehension.",
-        "medium": "Medium: apply concepts and connect 2-3 ideas from the summary.",
+        "medium": "Medium: apply concepts and connect 2-3 ideas from the document.",
         "hard":   "Hard: scenario-based and inference questions requiring deeper understanding.",
     }.get(level, "General factual questions.")
 
@@ -29,7 +29,7 @@ def generate_mcq_quiz(summary: str, level: str, num_questions: int = 5) -> dict[
 
     client = Groq(api_key=api_key)
 
-    prompt = f"""You are creating a {level} MCQ quiz for a student based on the provided summary.
+    prompt = f"""You are creating a {level} MCQ quiz for a student based on the provided document content.
     
 {level_instructions}
 
@@ -52,8 +52,8 @@ JSON schema:
 "answer" is 0-based index (0=A, 1=B, 2=C, 3=D).
 Number of questions: {num_questions}
 
-Summary:
-{summary}
+Document Content:
+{context}
 """
     try:
         completion = client.chat.completions.create(
@@ -69,10 +69,10 @@ Summary:
 
     except Exception as e:
         print(f"[Quiz LLM Error] {e}")
-        return _fallback_mcq_quiz(summary, level, num_questions)
+        return _fallback_mcq_quiz(context, level, num_questions)
 
 
-def _fallback_mcq_quiz(summary: str, level: str, num_questions: int = 5) -> dict[str, Any]:
+def _fallback_mcq_quiz(context: str, level: str, num_questions: int = 5) -> dict[str, Any]:
     # Simple static fallback if LLM fails
     questions = []
     for i in range(num_questions):
@@ -88,13 +88,40 @@ def _fallback_mcq_quiz(summary: str, level: str, num_questions: int = 5) -> dict
 
 def generate_quiz_from_upload(file: io.BytesIO, difficulty: str) -> dict[str, Any]:
     text = extract_text_from_file(file)
+    if not text or not text.strip():
+        raise ValueError("Document contains no text.")
     
-    # 1. Use Groq for summary
     from summarizer_app.summarizer import summarize_text
-    summary = summarize_text(text)
+    from services.rag_service import chunk_text
+    from concurrent.futures import ThreadPoolExecutor
+
+    # 1. Extract distributed chunks for quiz generation
+    chunks = chunk_text(text)
     
-    # 2. Use Groq for Quiz
-    quiz_obj = generate_mcq_quiz(summary=summary, level=difficulty, num_questions=5)
+    # Sample up to 5 chunks evenly distributed across the document
+    if len(chunks) > 5:
+        num_chunks = len(chunks)
+        sample_indices = [
+            0,
+            num_chunks // 4,
+            num_chunks // 2,
+            (3 * num_chunks) // 4,
+            num_chunks - 1
+        ]
+        sample_indices = sorted(list(set(sample_indices)))
+        selected_chunks = [chunks[idx] for idx in sample_indices]
+    else:
+        selected_chunks = chunks
+        
+    quiz_context = "\n\n---\n\n".join(selected_chunks)
+    
+    # 2. Run summarizer and quiz generator in parallel
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        summary_future = executor.submit(summarize_text, text)
+        quiz_future = executor.submit(generate_mcq_quiz, context=quiz_context, level=difficulty, num_questions=5)
+        
+        summary = summary_future.result()
+        quiz_obj = quiz_future.result()
 
     return {
         "summary":   summary,
